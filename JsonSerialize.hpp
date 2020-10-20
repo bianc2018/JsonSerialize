@@ -274,9 +274,14 @@ namespace JsonSerialize
         
         virtual  operator bool()const
         {
-            return nullptr == json_root_;
+            return is_vaild();
         }
-    
+        
+        //是否有效
+        virtual  bool is_vaild()const
+        {
+            return nullptr != json_root_;
+        }
     public:
         //json 操作接口
 
@@ -431,7 +436,8 @@ bool js_form_json(const std::string& json, T& t)
 {
     JsonSerialize::DeSerialize ar(json);
     ar >> t;
-    return ar;
+    auto ret =  ar.is_vaild();
+    return ret;
 }
 
 template<typename T>
