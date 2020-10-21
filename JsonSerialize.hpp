@@ -54,8 +54,8 @@ namespace JsonSerialize
 	struct KVPair :
 		public std::pair<const char *, T &>
 	{
-		explicit KVPair(const char * name_, T & t) :
-			std::pair<const char *, T &>(name_, t)
+		explicit KVPair(const char * name_, T & t,bool bmust) :
+			std::pair<const char *, T &>(name_, t),bmust_(bmust)
 		{}
 
 		const char* name() const {
@@ -69,11 +69,19 @@ namespace JsonSerialize
 		const T & const_value() const {
 			return this->second;
 		}
+        const bool& be_must() const {
+            return bmust_;
+        }
+    private:
+        //是否是必须的？
+        bool bmust_;
 	};
 
+
+
 	template<typename T>
-	inline const KVPair< T > make_kv(const char * name, T & t) {
-		return KVPair< T >(name, t);
+	inline const KVPair< T > make_kv(const char * name, T & t,bool must) {
+		return KVPair< T >(name, t, must);
 	}
 
     //获取参数
@@ -89,7 +97,59 @@ namespace JsonSerialize
         }
         return false;
     }
-    
+
+    bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, bool& t)
+    {
+        // std::cout << "set int" << std::endl;
+        if (obj)
+        {
+            if (obj->type == cJSON_True )
+            {
+                t = true;
+                return true;
+            }
+            else if (obj->type == cJSON_False)
+            {
+                t = false;
+                return true;
+            }
+
+        }
+        return false;
+    }
+
+    bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, char& t)
+    {
+        // std::cout << "set int" << std::endl;
+        if (obj)
+        {
+            if (obj->type == cJSON_Number)
+            {
+                t = (char)obj->valuedouble;
+                return true;
+            }
+
+        }
+        return false;
+    }
+
+    bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, unsigned char& t)
+    {
+        // std::cout << "set int" << std::endl;
+        if (obj)
+        {
+            if (obj->type == cJSON_Number)
+            {
+                if (obj->valuedouble < 0)
+                    return false;
+                t = (unsigned char)obj->valuedouble;
+                return true;
+            }
+
+        }
+        return false;
+    }
+
     bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, int& t)
     {
        // std::cout << "set int" << std::endl;
@@ -97,6 +157,7 @@ namespace JsonSerialize
         {
             if (obj->type == cJSON_Number)
             {
+
                 t = (int)obj->valuedouble;
                 return true;
             }
@@ -105,6 +166,87 @@ namespace JsonSerialize
         return false;
     }
     
+    //bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, size_t& t)
+    //{
+    //    // std::cout << "set int" << std::endl;
+    //    if (obj)
+    //    {
+    //        if (obj->type == cJSON_Number)
+    //        {
+    //            if (obj->valuedouble < 0)
+    //                return false;
+    //            t = (size_t)obj->valuedouble;
+    //            return true;
+    //        }
+
+    //    }
+    //    return false;
+    //}
+   
+    bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, unsigned int& t)
+    {
+        // std::cout << "set int" << std::endl;
+        if (obj)
+        {
+            if (obj->type == cJSON_Number)
+            {
+                if (obj->valuedouble < 0)
+                    return false;
+                t = (unsigned int)obj->valuedouble;
+                return true;
+            }
+
+        }
+        return false;
+    }
+    
+    bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, long& t)
+    {
+        // std::cout << "set int" << std::endl;
+        if (obj)
+        {
+            if (obj->type == cJSON_Number)
+            {
+                t = (long)obj->valuedouble;
+                return true;
+            }
+
+        }
+        return false;
+    }
+
+    bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, long long& t)
+    {
+        // std::cout << "set int" << std::endl;
+        if (obj)
+        {
+            if (obj->type == cJSON_Number)
+            {
+                t = (long long)obj->valuedouble;
+                return true;
+            }
+
+        }
+        return false;
+    }
+   
+    bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, unsigned long long& t)
+    {
+        // std::cout << "set int" << std::endl;
+        if (obj)
+        {
+            if (obj->type == cJSON_Number)
+            {
+                if (obj->valuedouble < 0)
+                    return false;
+                t = (unsigned long long)obj->valuedouble;
+                return true;
+            }
+
+        }
+        return false;
+    }
+
     bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, double& t)
     {
         //std::cout << "set double" << std::endl;
@@ -178,6 +320,48 @@ namespace JsonSerialize
         return true;
     }
 
+    bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, bool& t)
+    {
+        if (*obj)
+        {
+            if ((*obj)->type == cJSON_True|| (*obj)->type == cJSON_False)
+            {
+                (*obj)->type = (t) ? cJSON_True : cJSON_False;
+                return true;
+            }
+        }
+        *obj = cJSON_CreateBool(t);
+        return true;
+    }
+   
+    bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, char& t)
+    {
+        if (*obj)
+        {
+            if ((*obj)->type == cJSON_Number)
+            {
+                cJSON_SetNumberValue(*obj, t);
+                return true;
+            }
+        }
+        *obj = cJSON_CreateNumber(t);
+        return true;
+    }
+
+    bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj,unsigned char& t)
+    {
+        if (*obj)
+        {
+            if ((*obj)->type == cJSON_Number)
+            {
+                cJSON_SetNumberValue(*obj, t);
+                return true;
+            }
+        }
+        *obj = cJSON_CreateNumber(t);
+        return true;
+    }
+
     bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, int& t)
     {
         if (*obj)
@@ -192,7 +376,63 @@ namespace JsonSerialize
         return true;
     }
 
+    bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, unsigned int& t)
+    {
+        if (*obj)
+        {
+            if ((*obj)->type == cJSON_Number)
+            {
+                cJSON_SetNumberValue(*obj, t);
+                return true;
+            }
+        }
+        *obj = cJSON_CreateNumber(t);
+        return true;
+    }
+
     bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, double& t)
+    {
+        if (*obj)
+        {
+            if ((*obj)->type == cJSON_Number)
+            {
+                cJSON_SetNumberValue(*obj, t);
+                return true;
+            }
+        }
+        *obj = cJSON_CreateNumber(t);
+        return true;
+    }
+
+    bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, long& t)
+    {
+        if (*obj)
+        {
+            if ((*obj)->type == cJSON_Number)
+            {
+                cJSON_SetNumberValue(*obj, t);
+                return true;
+            }
+        }
+        *obj = cJSON_CreateNumber(t);
+        return true;
+    }
+
+    bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, long long& t)
+    {
+        if (*obj)
+        {
+            if ((*obj)->type == cJSON_Number)
+            {
+                cJSON_SetNumberValue(*obj, t);
+                return true;
+            }
+        }
+        *obj = cJSON_CreateNumber(t);
+        return true;
+    }
+
+    bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj,unsigned long long& t)
     {
         if (*obj)
         {
@@ -254,7 +494,7 @@ namespace JsonSerialize
     public:
         BaseSerialize(const std::string& json) :json_root_(nullptr)
         {
-            json_root_ = cJSON_Parse(json.c_str());
+            parse(json);
         }
         
         BaseSerialize(cJSON* json_root) :json_root_(json_root)
@@ -354,16 +594,26 @@ namespace JsonSerialize
                 json_root_ = cJSON_CreateObject();
                 if (json_root_ == nullptr)
                 {
+                    if (pair.be_must())
+                    {
+                        //错误 考虑用throw代替
+                        free_root();
+                    }
                     return *this;
                 }
             }
 
             cJSON*  obj = cJSON_GetObjectItem(json_root_, pair.name());
 
-            SERIALIZE_SET_JSON_OBJECT_FUNC(&obj, (pair.value()));
+            auto ret = SERIALIZE_SET_JSON_OBJECT_FUNC(&obj, (pair.value()));
             if (obj)
             {
                 cJSON_AddItemToObject(json_root_, pair.name(),obj);
+            }
+            if (pair.be_must()&&(!ret||nullptr == obj))
+            {
+                //错误
+                free_root();
             }
             return *this;
         }
@@ -394,7 +644,11 @@ namespace JsonSerialize
         {
             //std::cout << ">>" << pair.name() << std::endl;
             auto obj = cJSON_GetObjectItem(json_root_, pair.name());
-            SERIALIZE_GET_JSON_VALUE_FUNC(obj,pair.value());
+            auto ret = SERIALIZE_GET_JSON_VALUE_FUNC(obj,pair.value());
+            if (pair.be_must() && (!ret))
+            {
+                free_root();
+            }
             return *this;
         }
         
@@ -415,16 +669,25 @@ namespace JsonSerialize
 }
 
 // 侵入式, 指定key.
-#define JSON_SERIALIZATION_KEY_KV(key, name)	\
-    JsonSerialize::make_kv(key, name)
+#define JSON_SERIALIZATION_KEY_KV(key, name,m)	\
+    JsonSerialize::make_kv(key, name,m)
 
 // 用于serialize成员函数中声明要序列化的成员.
-#define JSON_SERIALIZATION_KV(name)	\
-    JSON_SERIALIZATION_KEY_KV(JSON_PP_STRINGIZE(name), name)
+#define JSON_SERIALIZATION_KV(name,m)	\
+    JSON_SERIALIZATION_KEY_KV(JSON_PP_STRINGIZE(name), name,m)
+
+// 用于serialize成员函数中声明要序列化的成员. 非必填项
+#define JSON_SERIALIZATION_KV_N(name)	\
+    JSON_SERIALIZATION_KV(name,false)
+
 
 // 非侵入式，避免类成员名字生成不正确.
-#define JSON_NI_SERIALIZATION_KV(classname, name)	\
-    JSON_SERIALIZATION_KEY_KV(JSON_PP_STRINGIZE(name), classname . name)
+#define JSON_NI_SERIALIZATION_KV(classname, name, m)	\
+    JSON_SERIALIZATION_KEY_KV(JSON_PP_STRINGIZE(name), classname . name,m)
+
+// 非侵入式，避免类成员名字生成不正确. 非必填项
+#define JSON_NI_SERIALIZATION_KV_N(classname, name)	\
+    JSON_NI_SERIALIZATION_KV(classname , name, false)
 
 //#define JSON_SERIALIZATION_BASE_OBJECT_KV(name) \
 //	JsonSerialize::make_kv(JSON_PP_STRINGIZE(name), base_object<name>(*this))
