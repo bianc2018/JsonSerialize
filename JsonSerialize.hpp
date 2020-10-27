@@ -12,6 +12,10 @@
  * 
  */
 
+#ifndef JSON_SERIALIZE_HPP_
+#define JSON_SERIALIZE_HPP_
+
+
 #include <string>
 #include <iostream>
 #include <vector>
@@ -86,7 +90,7 @@ namespace JsonSerialize
 
     //获取参数
     template<typename T>
-    bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON*obj, T &t)
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON*obj, T &t)
     {
         if (obj)
         {
@@ -98,7 +102,7 @@ namespace JsonSerialize
         return false;
     }
 
-    bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, bool& t)
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, bool& t)
     {
         // std::cout << "set int" << std::endl;
         if (obj)
@@ -118,7 +122,7 @@ namespace JsonSerialize
         return false;
     }
 
-    bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, char& t)
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, char& t)
     {
         // std::cout << "set int" << std::endl;
         if (obj)
@@ -133,7 +137,7 @@ namespace JsonSerialize
         return false;
     }
 
-    bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, unsigned char& t)
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, unsigned char& t)
     {
         // std::cout << "set int" << std::endl;
         if (obj)
@@ -150,7 +154,7 @@ namespace JsonSerialize
         return false;
     }
 
-    bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, int& t)
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, int& t)
     {
        // std::cout << "set int" << std::endl;
         if (obj)
@@ -183,7 +187,7 @@ namespace JsonSerialize
     //    return false;
     //}
    
-    bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, unsigned int& t)
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, unsigned int& t)
     {
         // std::cout << "set int" << std::endl;
         if (obj)
@@ -200,7 +204,7 @@ namespace JsonSerialize
         return false;
     }
     
-    bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, long& t)
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, long& t)
     {
         // std::cout << "set int" << std::endl;
         if (obj)
@@ -215,7 +219,7 @@ namespace JsonSerialize
         return false;
     }
 
-    bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, long long& t)
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, long long& t)
     {
         // std::cout << "set int" << std::endl;
         if (obj)
@@ -230,7 +234,7 @@ namespace JsonSerialize
         return false;
     }
    
-    bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, unsigned long long& t)
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, unsigned long long& t)
     {
         // std::cout << "set int" << std::endl;
         if (obj)
@@ -247,7 +251,7 @@ namespace JsonSerialize
         return false;
     }
 
-    bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, double& t)
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, double& t)
     {
         //std::cout << "set double" << std::endl;
         if (obj)
@@ -262,7 +266,7 @@ namespace JsonSerialize
         return false;
     }
 
-    bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, std::string& t)
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, std::string& t)
     {
         //std::cout << "set string" << std::endl;
         if (obj)
@@ -279,7 +283,7 @@ namespace JsonSerialize
     }
 
     template<typename T>
-    bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* arr, std::vector<T>& ts)
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* arr, std::vector<T>& ts)
     {
         //std::cout << "set vector" << std::endl;
         if (arr)
@@ -311,7 +315,7 @@ namespace JsonSerialize
     
     //设置参数
     template<typename T>
-    bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, T& t)
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, T& t)
     {
        
         DoSerialize ds(*obj);
@@ -320,7 +324,7 @@ namespace JsonSerialize
         return true;
     }
 
-    bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, bool& t)
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, bool& t)
     {
         if (*obj)
         {
@@ -334,7 +338,7 @@ namespace JsonSerialize
         return true;
     }
    
-    bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, char& t)
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, char& t)
     {
         if (*obj)
         {
@@ -348,7 +352,7 @@ namespace JsonSerialize
         return true;
     }
 
-    bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj,unsigned char& t)
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj,unsigned char& t)
     {
         if (*obj)
         {
@@ -362,7 +366,7 @@ namespace JsonSerialize
         return true;
     }
 
-    bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, int& t)
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, int& t)
     {
         if (*obj)
         {
@@ -376,7 +380,7 @@ namespace JsonSerialize
         return true;
     }
 
-    bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, unsigned int& t)
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, unsigned int& t)
     {
         if (*obj)
         {
@@ -390,7 +394,7 @@ namespace JsonSerialize
         return true;
     }
 
-    bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, double& t)
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, double& t)
     {
         if (*obj)
         {
@@ -404,7 +408,7 @@ namespace JsonSerialize
         return true;
     }
 
-    bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, long& t)
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, long& t)
     {
         if (*obj)
         {
@@ -418,7 +422,7 @@ namespace JsonSerialize
         return true;
     }
 
-    bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, long long& t)
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, long long& t)
     {
         if (*obj)
         {
@@ -432,7 +436,7 @@ namespace JsonSerialize
         return true;
     }
 
-    bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj,unsigned long long& t)
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj,unsigned long long& t)
     {
         if (*obj)
         {
@@ -446,7 +450,7 @@ namespace JsonSerialize
         return true;
     }
 
-    bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, std::string& t)
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, std::string& t)
     {
         if (*obj)
         {
@@ -461,7 +465,7 @@ namespace JsonSerialize
     }
 
     template<typename T>
-    bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, std::vector<T>& ts)
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, std::vector<T>& ts)
     {
         if (*obj)
         {
@@ -711,3 +715,5 @@ bool js_to_json(std::string& json, T& t)
     json = ar.print();
     return ar;
 }
+
+#endif // !JSON_SERIALIZE_HPP_
