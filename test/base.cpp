@@ -9,7 +9,7 @@ struct Test1
     int int_val=0;
     unsigned int uint_val = 0;
     double double_val = 0;
-    size_t size_t_val = 0;
+    //size_t size_t_val = 0;
     long long_val = 0;
     long long llong_val = 0;
     unsigned long long ullong_val = 0;
@@ -24,7 +24,7 @@ void Serialize(Archive& ar, Test1& t)
         & JSON_NI_SERIALIZATION_KV_N(t, int_val)
         & JSON_NI_SERIALIZATION_KV_N(t, uint_val)
         & JSON_NI_SERIALIZATION_KV_N(t, double_val)
-        & JSON_NI_SERIALIZATION_KV_N(t, size_t_val)
+        //& JSON_NI_SERIALIZATION_KV_N(t, size_t_val)
         & JSON_NI_SERIALIZATION_KV_N(t, long_val)
         & JSON_NI_SERIALIZATION_KV_N(t, llong_val)
         & JSON_NI_SERIALIZATION_KV_N(t, ullong_val)
@@ -41,7 +41,6 @@ TEST(Base, js_form_json)
         "\"int_val\":1,"
         "\"uint_val\":1,"
         "\"double_val\":1.100001,"
-        "\"size_t_val\":1,"
         "\"long_val\":1,"
         "\"llong_val\":1,"
         "\"ullong_val\":1,"
@@ -54,7 +53,7 @@ TEST(Base, js_form_json)
     EXPECT_EQ(t1.int_val, 1);
     EXPECT_EQ(t1.uint_val, 1);
     EXPECT_EQ(t1.double_val, 1.100001);
-    EXPECT_EQ(t1.size_t_val, 1);
+  //  EXPECT_EQ(t1.size_t_val, 1);
     EXPECT_EQ(t1.long_val, 1);
     EXPECT_EQ(t1.llong_val, 1);
     EXPECT_EQ(t1.ullong_val, 1);
