@@ -18,6 +18,7 @@
 
 #include <string>
 #include <iostream>
+#include <fstream>
 #include <vector>
 //依赖cjson
 #include "cJSON.h"
@@ -680,9 +681,9 @@ namespace JsonSerialize
 //	JsonSerialize::make_kv(JSON_PP_STRINGIZE(name), base_object<name>(*this))
 
 
-
+//json数据序列化到结构体
 template<typename T>
-bool js_form_json(const std::string& json, T& t)
+bool JsonSerializeFormJson(const std::string& json, T& t)
 {
     JsonSerialize::DeSerialize ar(json);
     ar >> t;
@@ -690,8 +691,9 @@ bool js_form_json(const std::string& json, T& t)
     return ret;
 }
 
+//反序列化结构体数据到json
 template<typename T>
-bool js_to_json(std::string& json, T& t)
+bool JsonSerializeToJson(std::string& json, T& t)
 {
     JsonSerialize::DoSerialize ar(json);
     ar << t;
@@ -699,4 +701,53 @@ bool js_to_json(std::string& json, T& t)
     return ar;
 }
 
+//json文件数据序列化到结构体
+template<typename T>
+bool JsonSerializeFormJsonFile(const std::string& jsonfilepath, T& t)
+{
+    //打开文件读数据
+    std::fstream jsonfile(jsonfilepath, std::ios::in);
+    if (!jsonfile)
+    {
+        //文件打开失败
+        return false;
+    }
+
+    //读数据
+    const unsigned int buff_size = 4 * 1024;
+    char buff[buff_size] = { 0 };
+    std::string json_content;
+    while (true)
+    {
+        jsonfile.read(buff, buff_size);
+        unsigned int rlen = jsonfile.gcount();
+        if (0 == rlen)//读完了
+            break;
+        json_content += std::string(buff, rlen);
+    }
+    return JsonSerializeFormJson(json_content,t);
+}
+
+//反序列化结构体数据到json文件
+template<typename T>
+bool JsonSerializeToJsonFile(const std::string& jsonfilepath, T& t)
+{
+    //打开文件读数据
+    std::fstream jsonfile(jsonfilepath, std::ios::out);
+    if (!jsonfile)
+    {
+        //文件打开失败
+        return false;
+    }
+    std::string json_content;
+    if (JsonSerializeToJson(json_content, t))
+    {
+        jsonfile.write(json_content.c_str(), json_content.size());
+        jsonfile.close();
+        return true;
+    }
+    jsonfile.close();
+    //转换失败
+    return false;
+}
 #endif // !JSON_SERIALIZE_HPP_

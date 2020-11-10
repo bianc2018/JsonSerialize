@@ -24,14 +24,14 @@ void Serialize(Archive& ar, Test1& t)
         & JSON_NI_SERIALIZATION_KV_N(t, int_val)
         & JSON_NI_SERIALIZATION_KV_N(t, uint_val)
         & JSON_NI_SERIALIZATION_KV_N(t, double_val)
-        //& JSON_NI_SERIALIZATION_KV_N(t, size_t_val)
         & JSON_NI_SERIALIZATION_KV_N(t, long_val)
         & JSON_NI_SERIALIZATION_KV_N(t, llong_val)
         & JSON_NI_SERIALIZATION_KV_N(t, ullong_val)
         & JSON_NI_SERIALIZATION_KV_N(t, string_val);
 }
+
 // case1
-TEST(Base, js_form_json)
+TEST(Base, JsonSerializeFormJson)
 {
     Test1 t1;
     std::string json = "{"
@@ -46,7 +46,7 @@ TEST(Base, js_form_json)
         "\"ullong_val\":1,"
         "\"string_val\":\"string\""
         "}";
-    ASSERT_EQ(js_form_json(json, t1), true);
+    ASSERT_EQ(JsonSerializeFormJson(json, t1), true);
     EXPECT_EQ(t1.bool_val, true);
     EXPECT_EQ(t1.char_val, 'A');
     EXPECT_EQ(t1.uchar_val, 1);
@@ -58,8 +58,73 @@ TEST(Base, js_form_json)
     EXPECT_EQ(t1.llong_val, 1);
     EXPECT_EQ(t1.ullong_val, 1);
     EXPECT_EQ(t1.string_val, "string");
+}
 
-    std::string json_1;
-    ASSERT_EQ(js_to_json(json_1, t1), true);
-    printf("js_to_json :%s\n", json_1.c_str());
+// case
+TEST(Base, JsonSerializeToJson)
+{
+    //转换为json，然后反过来
+    Test1 t1;
+    t1.bool_val = false;
+    t1.char_val = 'B';
+    t1.double_val = 0.002;
+    t1.int_val = 233;
+    t1.llong_val = 23333;
+    t1.long_val = 2233;
+    t1.string_val = "2333";
+    t1.uchar_val = 0;
+    t1.uint_val = 100;
+    t1.ullong_val = 100000;
+    std::string json;
+    ASSERT_EQ(JsonSerializeToJson(json, t1), true);
+    ASSERT_EQ(json.empty(), false);
+
+    //转换成JSON2
+    Test1 t2;
+    ASSERT_EQ(JsonSerializeFormJson(json, t2), true);
+    
+    EXPECT_EQ(t1.bool_val, t2.bool_val);
+    EXPECT_EQ(t1.char_val, t2.char_val);
+    EXPECT_EQ(t1.double_val, t2.double_val);
+    EXPECT_EQ(t1.int_val, t2.int_val);
+    EXPECT_EQ(t1.llong_val, t2.llong_val);
+    EXPECT_EQ(t1.long_val, t2.long_val);
+    EXPECT_EQ(t1.string_val, t2.string_val);
+    EXPECT_EQ(t1.uchar_val, t2.uchar_val);
+    EXPECT_EQ(t1.uint_val, t2.uint_val);
+    EXPECT_EQ(t1.ullong_val, t2.ullong_val);
+}
+
+// case
+TEST(Base, JsonSerializeJsonFile)
+{
+    const std::string jsonfilepath = "JsonSerializeJsonFile.json";
+    //转换为json，然后反过来
+    Test1 t1;
+    t1.bool_val = false;
+    t1.char_val = 'B';
+    t1.double_val = 0.002;
+    t1.int_val = 233;
+    t1.llong_val = 23333;
+    t1.long_val = 2233;
+    t1.string_val = "2333";
+    t1.uchar_val = 0;
+    t1.uint_val = 100;
+    t1.ullong_val = 100000;
+    ASSERT_EQ(JsonSerializeToJsonFile(jsonfilepath, t1), true);
+
+    //转换成JSON2
+    Test1 t2;
+    ASSERT_EQ(JsonSerializeFormJsonFile(jsonfilepath, t2), true);
+
+    EXPECT_EQ(t1.bool_val, t2.bool_val);
+    EXPECT_EQ(t1.char_val, t2.char_val);
+    EXPECT_EQ(t1.double_val, t2.double_val);
+    EXPECT_EQ(t1.int_val, t2.int_val);
+    EXPECT_EQ(t1.llong_val, t2.llong_val);
+    EXPECT_EQ(t1.long_val, t2.long_val);
+    EXPECT_EQ(t1.string_val, t2.string_val);
+    EXPECT_EQ(t1.uchar_val, t2.uchar_val);
+    EXPECT_EQ(t1.uint_val, t2.uint_val);
+    EXPECT_EQ(t1.ullong_val, t2.ullong_val);
 }
