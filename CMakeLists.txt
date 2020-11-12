@@ -5,6 +5,11 @@ cmake_minimum_required (VERSION 3.8)
 
 project ("JsonSerialize")
 
+# 开启单元测试，make test
+enable_testing() 
+#关闭cjson 的单元测试
+set(ENABLE_CJSON_TEST OFF)
+
 if(WIN32)
       message("WIN32 编译设置")
       ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS=1)
@@ -23,6 +28,8 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdpart/cJSON)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdpart/googletest/googletest/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/3rdpart/googletest/googlemock/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
+SET( CMAKE_VERBOSE_MAKEFILE on ) 
 
 # 包含子项目。
 add_subdirectory ("3rdpart/cJSON")
