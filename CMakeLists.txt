@@ -6,7 +6,7 @@ cmake_minimum_required (VERSION 3.8)
 project ("JsonSerialize")
 
 # 开启单元测试，make test
-enable_testing() 
+#enable_testing() 
 #关闭cjson 的单元测试
 set(ENABLE_CJSON_TEST OFF)
 
@@ -35,4 +35,10 @@ SET( CMAKE_VERBOSE_MAKEFILE on )
 add_subdirectory ("3rdpart/cJSON")
 add_subdirectory ("3rdpart/googletest")
 add_subdirectory ("example")
-add_subdirectory ("test")
+
+option(BUILD_TESTS "Build tests." TRUE)
+if (BUILD_TESTS)
+    enable_testing()
+    add_subdirectory ("test")
+endif()
+
