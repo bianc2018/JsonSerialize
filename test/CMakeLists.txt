@@ -1,5 +1,6 @@
 # all cpp files
 #file(GLOB_RECURSE CPP_SRC_LIST ${CMAKE_CURRENT_LIST_DIR}/*.cpp)
+enable_testing()
 file(GLOB_RECURSE CPP_SRC_LIST ./*.cpp)
 # generate target for every cpp file
 foreach(FILE_PATH ${CPP_SRC_LIST})
