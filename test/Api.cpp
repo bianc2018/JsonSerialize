@@ -1,6 +1,8 @@
+//API测试
 #include "JsonSerialize.hpp"
 #include "cJSON.h"
 #include <gtest/gtest.h>
+
 struct Test1
 {
     bool bool_val = false;
@@ -31,7 +33,7 @@ void Serialize(Archive& ar, Test1& t)
 }
 
 // case1
-TEST(Base, JsonSerializeFormJson)
+TEST(Api, JsonSerializeFormJson)
 {
     Test1 t1;
     std::string json = "{"
@@ -61,7 +63,7 @@ TEST(Base, JsonSerializeFormJson)
 }
 
 // case
-TEST(Base, JsonSerializeToJson)
+TEST(Api, JsonSerializeToJson)
 {
     //转换为json，然后反过来
     Test1 t1;
@@ -96,7 +98,7 @@ TEST(Base, JsonSerializeToJson)
 }
 
 // case
-TEST(Base, JsonSerializeJsonFile)
+TEST(Api, JsonSerializeJsonFile)
 {
     const std::string jsonfilepath = "JsonSerializeJsonFile.json";
     //转换为json，然后反过来

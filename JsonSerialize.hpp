@@ -236,7 +236,6 @@ namespace JsonSerialize
 
     inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, std::string& t)
     {
-        //std::cout << "set string" << std::endl;
         if (obj)
         {
             if (obj->type == cJSON_String)
@@ -280,6 +279,66 @@ namespace JsonSerialize
         }
         return false;
     }
+
+    template<unsigned int len>
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, char(&ts)[len])
+    {
+        if (obj)
+        {
+            if (obj->type == cJSON_String)
+            {
+                
+                if (obj->valuestring)
+                {
+                    //长度不符合
+                    auto _strlen = strlen(obj->valuestring);
+                    if (_strlen > len)
+                        return false;
+                    memcpy(ts, obj->valuestring, len);
+                    return true;
+                }
+                return true;
+            }
+
+        }
+        return false;
+    }
+
+    template<typename T, unsigned int len>
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* arr, char(&ts)[len])
+    {
+        //std::cout << "set vector" << std::endl;
+        if (arr)
+        {
+            //数组
+            if (arr->type == cJSON_Array)
+            {
+                auto size = cJSON_GetArraySize(arr);
+                if (size > len)
+                    return false;
+
+                for (auto i = 0; i < size; ++i)
+                {
+                    auto obj = cJSON_GetArrayItem(arr, i);
+                    T t;
+                    if (true == SERIALIZE_GET_JSON_VALUE_FUNC(obj, t))
+                    {
+                        ts[i]=t;
+                    }
+                    else
+                    {
+                        //错误
+                    }
+                }
+                return true;
+            }
+
+        }
+        return false;
+    }
+    
+    
+    //获取
 
     inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, bool& t)
     {
@@ -448,6 +507,52 @@ namespace JsonSerialize
         }
         return true;
     }
+
+    //长度为len的数组
+    template<unsigned int len>
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, char(&ts)[len])
+    {
+        if (*obj)
+        {
+            if ((*obj)->type == cJSON_String)//cJSON_Raw
+            {
+                cJSON_SetValuestring(*obj, ts);
+                return true;
+            }
+        }
+        *obj = cJSON_CreateString(ts);
+        return true;
+    }
+    
+    //长度为len的数组
+    template<typename T,unsigned int len>
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, T(&ts)[len])
+    {
+        if (*obj)
+        {
+            if ((*obj)->type != cJSON_Array)
+            {
+                //重新生成
+                *obj = nullptr;
+            }
+        }
+        if (*obj == nullptr)
+        {
+            *obj = cJSON_CreateArray();
+            if (*obj == nullptr)
+                return false;
+        }
+        //
+        for (int i=0;i< len;++i)
+        {
+            cJSON* it = nullptr;
+            SERIALIZE_SET_JSON_OBJECT_FUNC(&it, ts[i]);
+            if (it)
+                cJSON_AddItemToArray(*obj, it);
+        }
+        return true;
+    }
+
     //序列化基类
     class BaseSerialize
     {
