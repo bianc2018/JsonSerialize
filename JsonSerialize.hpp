@@ -292,8 +292,8 @@ namespace JsonSerialize
                 if (obj->valuestring)
                 {
                     //长度不符合
-                    auto _strlen = ::strlen(obj->valuestring);
-                    if (_strlen > len)
+                    auto valuestringlen = ::strlen(obj->valuestring);
+                    if (valuestringlen > len)
                         return false;
                     memcpy(ts, obj->valuestring, len);
                     return true;
