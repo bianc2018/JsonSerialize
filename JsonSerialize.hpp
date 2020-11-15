@@ -15,7 +15,7 @@
 #ifndef JSON_SERIALIZE_HPP_
 #define JSON_SERIALIZE_HPP_
 
-#include <stdio.h>
+#include <string.h>
 
 #include <string>
 #include <iostream>
