@@ -15,6 +15,7 @@
 #ifndef JSON_SERIALIZE_HPP_
 #define JSON_SERIALIZE_HPP_
 
+#include <stdio.h>
 
 #include <string>
 #include <iostream>
@@ -291,7 +292,7 @@ namespace JsonSerialize
                 if (obj->valuestring)
                 {
                     //长度不符合
-                    auto _strlen = strlen(obj->valuestring);
+                    auto _strlen = ::strlen(obj->valuestring);
                     if (_strlen > len)
                         return false;
                     memcpy(ts, obj->valuestring, len);
