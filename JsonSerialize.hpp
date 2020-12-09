@@ -88,6 +88,230 @@ namespace JsonSerialize
 		return KVPair< T >(name, t, must);
 	}
 
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, bool& t);
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, char& t);
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, unsigned char& t);
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, int& t);
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, unsigned int& t);
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, long& t);
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, long long& t);
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, unsigned long long& t);
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, double& t);
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, std::string& t);
+    template<typename T>
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* arr, std::vector<T>& ts);
+    template<unsigned int len>
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, char(&ts)[len]);
+    template<typename T, unsigned int len>
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* arr, char(&ts)[len]);
+
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, bool& t);
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, char& t);
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, unsigned char& t);
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, int& t);
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, unsigned int& t);
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, double& t);
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, long& t);
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, long long& t);
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, unsigned long long& t);
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, std::string& t);
+    template<typename T>
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, std::vector<T>& ts);
+    //长度为len的数组
+    template<unsigned int len>
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, char(&ts)[len]);
+    //长度为len的数组
+    template<typename T,unsigned int len>
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, T(&ts)[len]);
+    //获取参数
+    template<typename T>
+    inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON*obj, T &t);
+    //设置参数
+    template<typename T>
+    inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, T& t);
+
+    //序列化基类
+    class BaseSerialize
+    {
+    public:
+        BaseSerialize(const std::string& json) :json_root_(nullptr)
+        {
+            parse(json);
+        }
+
+        BaseSerialize(cJSON* json_root) :json_root_(json_root)
+        {
+
+        }
+
+        BaseSerialize() :json_root_(nullptr)
+        {
+
+        }
+
+        virtual ~BaseSerialize()
+        {
+            free_root();
+        }
+
+        virtual  operator bool()const
+        {
+            return is_vaild();
+        }
+
+        //是否有效
+        virtual  bool is_vaild()const
+        {
+            return nullptr != json_root_;
+        }
+    public:
+        //json 操作接口
+
+        //获取
+        cJSON* get_root()
+        {
+            return json_root_;
+        }
+
+        //移动
+        cJSON* move_root()
+        {
+            auto p = json_root_;
+            json_root_ = nullptr;
+            return p;
+        }
+
+        //释放
+        bool free_root()
+        {
+            if (json_root_)
+            {
+                cJSON_Delete(json_root_);
+                json_root_ = nullptr;
+            }
+            return true;
+        }
+
+        bool  parse(const std::string& json)
+        {
+            json_root_ = cJSON_Parse(json.c_str());
+            return *this;
+        }
+
+        std::string print()
+        {
+            std::string str;
+            if (json_root_)
+            {
+                auto cp = cJSON_Print(json_root_);
+                if (cp)
+                {
+                    str = cp;
+                    cJSON_free(cp);
+                }
+            }
+            return str;
+        }
+        //禁止拷贝
+    private:
+        BaseSerialize(const BaseSerialize& that) = delete;
+        BaseSerialize& operator=(const BaseSerialize& that) = delete;
+    protected:
+        cJSON* json_root_;
+    };
+
+    //序列化类  struct->std::string
+    class DoSerialize :public BaseSerialize
+    {
+    public:
+        using BaseSerialize::BaseSerialize;
+
+        template<typename T>
+        DoSerialize& operator<<(KVPair<T> pair)
+        {
+            //std::cout << "<<" << pair.name() << std::endl;
+
+            if (json_root_ == nullptr)
+            {
+                json_root_ = cJSON_CreateObject();
+                if (json_root_ == nullptr)
+                {
+                    if (pair.be_must())
+                    {
+                        //错误 考虑用throw代替
+                        free_root();
+                    }
+                    return *this;
+                }
+            }
+
+            cJSON* obj = cJSON_GetObjectItem(json_root_, pair.name());
+
+            auto ret = SERIALIZE_SET_JSON_OBJECT_FUNC(&obj, (pair.value()));
+            if (obj)
+            {
+                cJSON_AddItemToObject(json_root_, pair.name(), obj);
+            }
+            if (pair.be_must() && (!ret || nullptr == obj))
+            {
+                //错误
+                free_root();
+            }
+            return *this;
+        }
+
+        template<typename T>
+        DoSerialize& operator<<(T& t)
+        {
+            //std::cout << " <<T" << std::endl;
+            Serialize(*this, t);
+            return *this;
+        }
+
+        template<typename T>
+        DoSerialize& operator&(KVPair<T> pair)
+        {
+            return operator<<(pair);
+        }
+    };
+
+    //反序列化
+    class DeSerialize :public BaseSerialize
+    {
+    public:
+        using BaseSerialize::BaseSerialize;
+
+        template<typename T>
+        DeSerialize& operator>>(KVPair<T> pair)
+        {
+            //std::cout << ">>" << pair.name() << std::endl;
+            auto obj = cJSON_GetObjectItem(json_root_, pair.name());
+            auto ret = SERIALIZE_GET_JSON_VALUE_FUNC(obj, pair.value());
+            if (pair.be_must() && (!ret))
+            {
+                free_root();
+            }
+            return *this;
+        }
+
+        template<typename T>
+        DeSerialize& operator>>(T& t)
+        {
+            //std::cout << " >>T"<< std::endl;
+            Serialize(*this, t);
+            return *this;
+        }
+
+        template<typename T>
+        DeSerialize& operator&(KVPair<T> pair)
+        {
+            return operator>>(pair);
+        }
+    };
+
+
+
+    ///实现
     inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON* obj, bool& t)
     {
         // std::cout << "set int" << std::endl;
@@ -340,7 +564,6 @@ namespace JsonSerialize
     
     
     //获取
-
     inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, bool& t)
     {
         if (*obj)
@@ -554,185 +777,6 @@ namespace JsonSerialize
         return true;
     }
 
-    //序列化基类
-    class BaseSerialize
-    {
-    public:
-        BaseSerialize(const std::string& json) :json_root_(nullptr)
-        {
-            parse(json);
-        }
-
-        BaseSerialize(cJSON* json_root) :json_root_(json_root)
-        {
-
-        }
-
-        BaseSerialize() :json_root_(nullptr)
-        {
-
-        }
-
-        virtual ~BaseSerialize()
-        {
-            free_root();
-        }
-
-        virtual  operator bool()const
-        {
-            return is_vaild();
-        }
-
-        //是否有效
-        virtual  bool is_vaild()const
-        {
-            return nullptr != json_root_;
-        }
-    public:
-        //json 操作接口
-
-        //获取
-        cJSON* get_root()
-        {
-            return json_root_;
-        }
-
-        //移动
-        cJSON* move_root()
-        {
-            auto p = json_root_;
-            json_root_ = nullptr;
-            return p;
-        }
-
-        //释放
-        bool free_root()
-        {
-            if (json_root_)
-            {
-                cJSON_Delete(json_root_);
-                json_root_ = nullptr;
-            }
-            return true;
-        }
-
-        bool  parse(const std::string& json)
-        {
-            json_root_ = cJSON_Parse(json.c_str());
-            return *this;
-        }
-
-        std::string print()
-        {
-            std::string str;
-            if (json_root_)
-            {
-                auto cp = cJSON_Print(json_root_);
-                if (cp)
-                {
-                    str = cp;
-                    cJSON_free(cp);
-                }
-            }
-            return str;
-        }
-        //禁止拷贝
-    private:
-        BaseSerialize(const BaseSerialize& that) = delete;
-        BaseSerialize& operator=(const BaseSerialize& that) = delete;
-    protected:
-        cJSON* json_root_;
-    };
-
-    //序列化类  struct->std::string
-    class DoSerialize :public BaseSerialize
-    {
-    public:
-        using BaseSerialize::BaseSerialize;
-
-        template<typename T>
-        DoSerialize& operator<<(KVPair<T> pair)
-        {
-            //std::cout << "<<" << pair.name() << std::endl;
-
-            if (json_root_ == nullptr)
-            {
-                json_root_ = cJSON_CreateObject();
-                if (json_root_ == nullptr)
-                {
-                    if (pair.be_must())
-                    {
-                        //错误 考虑用throw代替
-                        free_root();
-                    }
-                    return *this;
-                }
-            }
-
-            cJSON* obj = cJSON_GetObjectItem(json_root_, pair.name());
-
-            auto ret = SERIALIZE_SET_JSON_OBJECT_FUNC(&obj, (pair.value()));
-            if (obj)
-            {
-                cJSON_AddItemToObject(json_root_, pair.name(), obj);
-            }
-            if (pair.be_must() && (!ret || nullptr == obj))
-            {
-                //错误
-                free_root();
-            }
-            return *this;
-        }
-
-        template<typename T>
-        DoSerialize& operator<<(T& t)
-        {
-            //std::cout << " <<T" << std::endl;
-            Serialize(*this, t);
-            return *this;
-        }
-
-        template<typename T>
-        DoSerialize& operator&(KVPair<T> pair)
-        {
-            return operator<<(pair);
-        }
-    };
-
-    //反序列化
-    class DeSerialize :public BaseSerialize
-    {
-    public:
-        using BaseSerialize::BaseSerialize;
-
-        template<typename T>
-        DeSerialize& operator>>(KVPair<T> pair)
-        {
-            //std::cout << ">>" << pair.name() << std::endl;
-            auto obj = cJSON_GetObjectItem(json_root_, pair.name());
-            auto ret = SERIALIZE_GET_JSON_VALUE_FUNC(obj, pair.value());
-            if (pair.be_must() && (!ret))
-            {
-                free_root();
-            }
-            return *this;
-        }
-
-        template<typename T>
-        DeSerialize& operator>>(T& t)
-        {
-            //std::cout << " >>T"<< std::endl;
-            Serialize(*this, t);
-            return *this;
-        }
-
-        template<typename T>
-        DeSerialize& operator&(KVPair<T> pair)
-        {
-            return operator>>(pair);
-        }
-    };
-
     //获取参数
     template<typename T>
     inline bool SERIALIZE_GET_JSON_VALUE_FUNC(cJSON*obj, T &t)
@@ -747,8 +791,6 @@ namespace JsonSerialize
         return false;
     }
 
-   
-    
     //设置参数
     template<typename T>
     inline bool SERIALIZE_SET_JSON_OBJECT_FUNC(cJSON** obj, T& t)
@@ -759,6 +801,7 @@ namespace JsonSerialize
         *obj = ds.move_root();//释放
         return true;
     }
+
 
 }
 
